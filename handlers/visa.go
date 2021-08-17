@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"citizenvisas/storage"
-	"citizenvisas/webservices"
+	"citizenvisas/types"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -16,7 +16,7 @@ type Visa struct{}
 
 func (visa Visa) Create(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var data webservices.Visa
+		var data types.Visa
 		json.NewDecoder(r.Body).Decode(&data)
 
 		var store = storage.VisaDataStore{}
@@ -26,7 +26,7 @@ func (visa Visa) Create(db *gorm.DB) http.HandlerFunc {
 
 func (visa Visa) Visas(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var fields []webservices.Visa
+		var fields []types.Visa
 
 		var store = storage.VisaDataStore{}
 		fields, err := store.Visas(ctx, db)
@@ -40,7 +40,7 @@ func (visa Visa) Visas(db *gorm.DB) http.HandlerFunc {
 
 func (visa Visa) Visa(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var field webservices.Visa
+		var field types.Visa
 		json.NewDecoder(r.Body).Decode(&field)
 
 		var store = storage.VisaDataStore{}
@@ -57,7 +57,7 @@ func (visa Visa) Update(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var data = storage.Data{}
 
-		var name webservices.Visa
+		var name types.Visa
 		json.NewDecoder(r.Body).Decode(&data)
 
 		var store = storage.VisaDataStore{}
@@ -73,9 +73,9 @@ func (visa Visa) Update(db *gorm.DB) http.HandlerFunc {
 
 func (visa Visa) Delete(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var data webservices.Visa
+		var data types.Visa
 
-		var res webservices.Visa
+		var res types.Visa
 		json.NewDecoder(r.Body).Decode(&res)
 
 		var store = storage.VisaDataStore{}

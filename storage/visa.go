@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"citizenvisas/webservices"
+	"citizenvisas/types"
 	"context"
 
 	"gorm.io/gorm"
@@ -15,26 +15,26 @@ type Data struct {
 	NewData string
 }
 
-func (visa VisaDataStore) Create(ctx context.Context, data webservices.Visa, db *gorm.DB) error {
+func (visa VisaDataStore) Create(ctx context.Context, data types.Visa, db *gorm.DB) error {
 	return db.Create(&data).Error
 }
 
-func (visa VisaDataStore) Visas(ctx context.Context, db *gorm.DB) ([]webservices.Visa, error) {
-	var visas []webservices.Visa
+func (visa VisaDataStore) Visas(ctx context.Context, db *gorm.DB) ([]types.Visa, error) {
+	var visas []types.Visa
 	return visas, db.Find((&visas)).Error
 }
 
-func (visa VisaDataStore) Visa(ctx context.Context, db *gorm.DB, id string) (webservices.Visa, error) {
-	var result webservices.Visa
+func (visa VisaDataStore) Visa(ctx context.Context, db *gorm.DB, id string) (types.Visa, error) {
+	var result types.Visa
 
-	return result, db.Model(&webservices.Visa{}).Where("visa_number = ?", id).Find(&result).Error
+	return result, db.Model(&types.Visa{}).Where("visa_number = ?", id).Find(&result).Error
 
 }
 
-func (visa VisaDataStore) Update(ctx context.Context, db *gorm.DB, data webservices.Visa, visaNumber Data) error {
-	return db.Model(&webservices.Visa{}).Where("visa_number = ?", visaNumber.Data).Update("visa_number", visaNumber.NewData).Error
+func (visa VisaDataStore) Update(ctx context.Context, db *gorm.DB, data types.Visa, visaNumber Data) error {
+	return db.Model(&types.Visa{}).Where("visa_number = ?", visaNumber.Data).Update("visa_number", visaNumber.NewData).Error
 }
 
-func (visa VisaDataStore) Delete(ctx context.Context, db *gorm.DB, data webservices.Visa, id string) error {
-	return db.Model(&webservices.Visa{}).Where("visa_number = ?", id).Delete(&data).Error
+func (visa VisaDataStore) Delete(ctx context.Context, db *gorm.DB, data types.Visa, id string) error {
+	return db.Model(&types.Visa{}).Where("visa_number = ?", id).Delete(&data).Error
 }

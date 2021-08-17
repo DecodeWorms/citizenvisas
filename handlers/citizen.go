@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"citizenvisas/storage"
-	"citizenvisas/webservices"
+	"citizenvisas/types"
 	"context"
 	"encoding/json"
 	"log"
@@ -19,7 +19,7 @@ var ctx context.Context
 func (citizen Citizen) Create(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		var fields webservices.Citizen
+		var fields types.Citizen
 		json.NewDecoder(r.Body).Decode(&fields)
 
 		var store = storage.DataStore{}
@@ -32,7 +32,7 @@ func (citizen Citizen) Create(db *gorm.DB) http.HandlerFunc {
 
 func (citizen Citizen) Citizens(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var fields []webservices.Citizen
+		var fields []types.Citizen
 
 		var store = storage.DataStore{}
 		fields, err := store.Citizens(ctx, db)
@@ -46,7 +46,7 @@ func (citizen Citizen) Citizens(db *gorm.DB) http.HandlerFunc {
 
 func (citizen Citizen) Citizen(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var name webservices.Citizen
+		var name types.Citizen
 		json.NewDecoder(r.Body).Decode(&name)
 
 		var store = storage.DataStore{}
@@ -64,7 +64,7 @@ func (citizen Citizen) Update(db *gorm.DB) http.HandlerFunc {
 
 		var data = storage.ChangeData{}
 
-		var name webservices.Citizen
+		var name types.Citizen
 		json.NewDecoder(r.Body).Decode(&data)
 
 		var store = storage.DataStore{}
@@ -78,10 +78,10 @@ func (citizen Citizen) Update(db *gorm.DB) http.HandlerFunc {
 
 func (citizen Citizen) Delete(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var name webservices.Citizen
+		var name types.Citizen
 		json.NewDecoder(r.Body).Decode(&name)
 
-		var model webservices.Citizen
+		var model types.Citizen
 
 		var store = storage.DataStore{}
 		err := store.Delete(ctx, db, name.Name, model)
