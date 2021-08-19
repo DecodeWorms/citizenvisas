@@ -1,93 +1,118 @@
 package handlers
 
 import (
-	"citizenvisas/storage"
-	"citizenvisas/types"
-	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/decodeworms/citizenvisas/storage"
+	"github.com/decodeworms/citizenvisas/types"
+	"github.com/decodeworms/citizenvisas/util"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-
-	"gorm.io/gorm"
 )
 
-type Citizen struct {
+type CitizenHandler struct {
+	store *storage.DataStore
 }
 
-var ctx context.Context
-
-func (citizen Citizen) Create(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		var fields types.Citizen
-		json.NewDecoder(r.Body).Decode(&fields)
-
-		var store = storage.DataStore{}
-		err := store.Create(ctx, fields, db)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+func NewCitizenHandler(s *storage.DataStore) CitizenHandler {
+	return CitizenHandler{store: s}
 }
 
-func (citizen Citizen) Citizens(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var fields []types.Citizen
+func (c CitizenHandler) Create(w http.ResponseWriter, r *http.Request) {
+	// setting the header for your endpoint is very important
+	util.SetHeader(w)
 
-		var store = storage.DataStore{}
-		fields, err := store.Citizens(ctx, db)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-		json.NewEncoder(w).Encode(fields)
+	var data types.Citizen
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		e := errors.New(fmt.Sprintf("error decoding data: %s", err))
+		json.NewEncoder(w).Encode(e)
 	}
+
+	log.Println("data being passed", data)
+
+	err = c.store.Create(&data)
+	if err != nil {
+		// encode and return error. DO NOT log.Fatal(err)
+		json.NewEncoder(w).Encode(err)
+	}
+
+	json.NewEncoder(w).Encode(true)
 }
 
-func (citizen Citizen) Citizen(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var name types.Citizen
-		json.NewDecoder(r.Body).Decode(&name)
+func (c CitizenHandler) Citizen(w http.ResponseWriter, r *http.Request) {
+	// setting the header for your endpoint is very important
+	util.SetHeader(w)
 
-		var store = storage.DataStore{}
-		res, err := store.Citizen(ctx, db, name.Name)
-		if err != nil {
-			log.Fatal(err)
-		}
+	// extracting parameter from request
+	params := mux.Vars(r)
+	id := params["id"]
 
-		json.NewEncoder(w).Encode(res)
+	log.Println("id being passed", id)
+
+	// getting data from storage
+	result, err := c.store.Citizen(id)
+	if err != nil {
+		// encode and return error. DO NOT log.Fatal(err)
+		json.NewEncoder(w).Encode(err)
 	}
+
+	json.NewEncoder(w).Encode(result)
 }
 
-func (citizen Citizen) Update(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (c CitizenHandler) Citizens(w http.ResponseWriter, r *http.Request) {
+	// setting the header for your endpoint is very important
+	util.SetHeader(w)
 
-		var data = storage.ChangeData{}
-
-		var name types.Citizen
-		json.NewDecoder(r.Body).Decode(&data)
-
-		var store = storage.DataStore{}
-		err := store.Update(ctx, db, name, data)
-		if err != nil {
-			log.Fatal(err)
-		}
-		json.NewEncoder(w).Encode(name)
+	// getting data from storage
+	citizens, err := c.store.Citizens()
+	if err != nil {
+		// encode and return error. DO NOT log.Fatal(err)
+		json.NewEncoder(w).Encode(err)
 	}
+
+	json.NewEncoder(w).Encode(citizens)
 }
 
-func (citizen Citizen) Delete(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var name types.Citizen
-		json.NewDecoder(r.Body).Decode(&name)
+func (c CitizenHandler) Update(w http.ResponseWriter, r *http.Request) {
+	// setting the header for your endpoint is very important
+	util.SetHeader(w)
 
-		var model types.Citizen
-
-		var store = storage.DataStore{}
-		err := store.Delete(ctx, db, name.Name, model)
-
-		if err != nil {
-			log.Fatal(err)
-		}
+	var data types.Citizen
+	err := json.NewDecoder(r.Body).Decode(data)
+	if err != nil {
+		e := errors.New(fmt.Sprintf("error decoding data: %s", err))
+		json.NewEncoder(w).Encode(e)
 	}
+
+	log.Println("data being passed", data)
+
+	err = c.store.Update(data)
+	if err != nil {
+		// encode and return error. DO NOT log.Fatal(err)
+		json.NewEncoder(w).Encode(err)
+	}
+
+	json.NewEncoder(w).Encode(true)
+}
+
+func (c CitizenHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	// setting the header for your endpoint is very important
+	util.SetHeader(w)
+
+	// extracting parameter from request
+	params := mux.Vars(r)
+	id := params["id"]
+
+	log.Println("id being passed", id)
+
+	err := c.store.Delete(id)
+	if err != nil {
+		// encode and return error. DO NOT log.Fatal(err)
+		json.NewEncoder(w).Encode(err)
+	}
+
+	json.NewEncoder(w).Encode(true)
 }
