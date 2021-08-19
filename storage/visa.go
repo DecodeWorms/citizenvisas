@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"citizenvisas/types"
 	"context"
+	"github.com/decodeworms/citizenvisas/types"
 
 	"gorm.io/gorm"
 )
